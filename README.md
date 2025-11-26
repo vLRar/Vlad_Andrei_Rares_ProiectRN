@@ -30,37 +30,3 @@ project-name/
 │   └── neural_network/    # implementarea RN (în etapa următoare)
 ├── config/                # fișiere de configurare
 └── requirements.txt       # dependențe Python (dacă aplicabil)
-
-
-##  2. Descrierea Setului de Date
-
--Acoperirea norilor - procentul sau nivelul de înnorare
-
--Viteza vantului - intensitatea vântului, afecteaza temperatura panourilor
-
--Ora - important pentru poziția soarelui și variația naturală a radiației solare.
-
--Data - include informații sezoniere
-
--Gradul de umbrire al panourilor (imagine) - proceseaza o imagine cu panoul solar si determina cata energie poate produce
-
--Radiatia solara - intensitatea energiei solare disponibile pe suprafața panourilor
-
--Umiditatea - cantitatea de vapori de apă din aer, care poate afecta transmiterea radiației solare.
-
--Nivelul de productie al panoului - energia generată de panou la un anumit moment, folosită ca variabilă țintă pentru antrenare.
-
-
-### 2.1 Sursa datelor
-
-* **Origine: dataset public
-* **Modul de achiziție: Fișier extern 
-* **Perioada / condițiile colectării:
-
-### 2.2 Caracteristicile dataset-ului
-
-* **Număr total de observații:
-* **Număr de caracteristici (features):
-* **Tipuri de date: Numerice / Imagini
-* **Format fișiere:  TXT /  JPG 
-
