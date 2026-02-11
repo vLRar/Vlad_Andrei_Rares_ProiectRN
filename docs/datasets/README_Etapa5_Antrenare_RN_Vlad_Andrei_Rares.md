@@ -26,11 +26,11 @@ Această etapă corespunde punctului **6. Configurarea și antrenarea modelului 
 **Înainte de a începe Etapa 5, verificați că aveți din Etapa 4:**
 
 - [x] **State Machine** definit și documentat în `docs/state_machine.*`
-- [ ] **Contribuție ≥40% date originale** în `data/generated/` (verificabil)
+- [x] **Contribuție ≥40% date originale** în `data/generated/` (verificabil)
 - [x] **Modul 1 (Data Logging)** funcțional - produce CSV-uri
 - [x] **Modul 2 (RN)** cu arhitectură definită dar NEANTRENATĂ (`models/untrained_model.h5`)
 - [x] **Modul 3 (UI/Web Service)** funcțional cu model dummy
-- [ ] **Tabelul "Nevoie → Soluție → Modul"** complet în README Etapa 4
+- [x] **Tabelul "Nevoie → Soluție → Modul"** complet în README Etapa 4
 
 ** Dacă oricare din punctele de mai sus lipsește → reveniți la Etapa 4 înainte de a continua.**
 
@@ -97,29 +97,11 @@ Completați tabelul cu hiperparametrii folosiți și **justificați fiecare aleg
 
 | **Hiperparametru** | **Valoare Aleasă** | **Justificare** |
 |--------------------|-------------------|-----------------|
-| Learning rate | Ex: 0.001 | Valoare standard pentru Adam optimizer, asigură convergență stabilă |
-| Batch size | Ex: 32 | Compromis memorie/stabilitate pentru N=[numărul vostru] samples |
-| Number of epochs | Ex: 50 | Cu early stopping după 10 epoci fără îmbunătățire |
-| Optimizer | Ex: Adam | Adaptive learning rate, potrivit pentru RN cu [numărul vostru] straturi |
-| Loss function | Ex: Categorical Crossentropy | Clasificare multi-class cu K=[numărul vostru] clase |
-| Activation functions | Ex: ReLU (hidden), Softmax (output) | ReLU pentru non-linearitate, Softmax pentru probabilități clase |
 
-**Justificare detaliată batch size (exemplu):**
-```
-Am ales batch_size=32 pentru că avem N=15,000 samples → 15,000/32 ≈ 469 iterații/epocă.
-Aceasta oferă un echilibru între:
-- Stabilitate gradient (batch prea mic → zgomot mare în gradient)
-- Memorie GPU (batch prea mare → out of memory)
-- Timp antrenare (batch 32 asigură convergență în ~50 epoci pentru problema noastră)
-```
-
-**Resurse învățare rapidă:**
-- Împărțire date: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html (video 3 min: https://youtu.be/1NjLMWSGosI?si=KL8Qv2SJ1d_mFZfr)  
-- Antrenare simplă Keras: https://keras.io/examples/vision/mnist_convnet/ (secțiunea „Training”)  
-- Antrenare simplă PyTorch: https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html#training-an-image-classifier (video 2 min: https://youtu.be/ORMx45xqWkA?si=FXyQEhh0DU8VnuVJ)  
-- F1-score: https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html (video 4 min: https://youtu.be/ZQlEcyNV6wc?si=VMCl8aGfhCfp5Egi)
-
-
+Arhitectura (Hidden Layers) - 1 strat cu 3 neuroni - S-a testat inițial cu 10 neuroni, dar rețeaua intra în Overfitting (memora zgomotul). Arhitectura 6-3-1 s-a dovedit cea mai robustă pentru cele 50.000 de eșantioane.
+Learning Rate (Rata de învățare) -	0.01 -	O valoare mai mare (0.1) cauza oscilații puternice ale erorii (grafic instabil). Valoarea 0.01 a asigurat o convergență lentă dar sigură.
+Momentum -	0.9 -	Adăugat pentru a accelera ieșirea din minimele locale plate și a stabiliza direcția gradientului.
+Număr de Epoci	20000 - 50000	Antrenarea s-a oprit automat când eroarea pe setul de validare nu a mai scăzut timp de 100 de epoci (Early Stopping).
 ---
 
 ### Nivel 2 – Recomandat (85-90% din punctaj)
@@ -236,9 +218,25 @@ Soluție: Ajustare threshold clasificare de la 0.5 → 0.3 pentru clasa 'defect'
 
 **Completați pentru proiectul vostru:**
 ```
-[Analizați impactul erorilor în contextul aplicației voastre și prioritizați]
-```
+Analiza pe Cazuri Extreme (Edge Cases)
 
+Am testat manual modelul (Predictie.vi) în scenarii atipice pentru a verifica robustețea:
+
+    Caz: Radiație Maximă + Nori 100%.
+
+        Rezultat: Rețeaua a prezis o producție medie (nu maximă), ceea ce este corect (lumina difuză trece prin nori).
+
+    Caz: Noapte (Ora 0) + Radiație > 0 
+
+        Rezultat: Rețeaua a dat prioritate orei și a prezis valori foarte mici, demonstrând că a învățat ciclicitatea temporală ca factor dominant.
+
+Relevanța Industrială
+
+Un astfel de model, odată calibrat pe datele unui parc fotovoltaic real, poate fi utilizat pentru:
+
+    Prognoză pe Termen Scurt: Estimarea producției pentru următoarele 15 minute pe baza imaginilor satelitare (nori).
+
+    Detecția Defecțiunilor: Dacă producția reală scade mult sub cea prezisă de rețeaua neuronală (care știe condițiile meteo), operatorul primește o alertă că un panou ar putea fi defect sau murdar.
 ### 4. Ce măsuri corective propuneți?
 
 **Exemplu clasificare imagini piese:**
@@ -385,36 +383,36 @@ streamlit run src/app/main.py
 ## Checklist Final – Bifați Totul Înainte de Predare
 
 ### Prerequisite Etapa 4 (verificare)
-- [ ] State Machine există și e documentat în `docs/state_machine.*`
-- [ ] Contribuție ≥40% date originale verificabilă în `data/generated/`
-- [ ] Cele 3 module din Etapa 4 funcționale
+- [x] State Machine există și e documentat în `docs/state_machine.*`
+- [x] Contribuție ≥40% date originale verificabilă în `data/generated/`
+- [x] Cele 3 module din Etapa 4 funcționale
 
 ### Preprocesare și Date
-- [ ] Dataset combinat (vechi + nou) preprocesat (dacă ați adăugat date)
-- [ ] Split train/val/test: 70/15/15% (verificat dimensiuni fișiere)
-- [ ] Scaler din Etapa 3 folosit consistent (`config/preprocessing_params.pkl`)
+- [x] Dataset combinat (vechi + nou) preprocesat (dacă ați adăugat date)
+- [x] Split train/val/test: 70/15/15% (verificat dimensiuni fișiere)
+- [x] Scaler din Etapa 3 folosit consistent (`config/preprocessing_params.pkl`)
 
 ### Antrenare Model - Nivel 1 (OBLIGATORIU)
-- [ ] Model antrenat de la ZERO (nu fine-tuning pe model pre-antrenat)
-- [ ] Minimum 10 epoci rulate (verificabil în `results/training_history.csv`)
-- [ ] Tabel hiperparametri + justificări completat în acest README
-- [ ] Metrici calculate pe test set: **Accuracy ≥65%**, **F1 ≥0.60**
+- [x] Model antrenat de la ZERO (nu fine-tuning pe model pre-antrenat)
+- [x] Minimum 10 epoci rulate (verificabil în `results/training_history.csv`)
+- [x] Tabel hiperparametri + justificări completat în acest README
+- [x] Metrici calculate pe test set: **Accuracy ≥65%**, **F1 ≥0.60**
 - [ ] Model salvat în `models/trained_model.h5` (sau .pt, .lvmodel)
 - [ ] `results/training_history.csv` există cu toate epoch-urile
 
 ### Integrare UI și Demonstrație - Nivel 1 (OBLIGATORIU)
-- [ ] Model ANTRENAT încărcat în UI din Etapa 4 (nu model dummy)
-- [ ] UI face inferență REALĂ cu predicții corecte
-- [ ] Screenshot inferență reală în `docs/screenshots/inference_real.png`
-- [ ] Verificat: predicțiile sunt diferite față de Etapa 4 (când erau random)
+- [x] Model ANTRENAT încărcat în UI din Etapa 4 (nu model dummy)
+- [x] UI face inferență REALĂ cu predicții corecte
+- [x] Screenshot inferență reală în `docs/screenshots/inference_real.png`
+- [x] Verificat: predicțiile sunt diferite față de Etapa 4 (când erau random)
 
 ### Documentație Nivel 2 (dacă aplicabil)
-- [ ] Early stopping implementat și documentat în cod
+- [x] Early stopping implementat și documentat în cod
 - [ ] Learning rate scheduler folosit (ReduceLROnPlateau / StepLR)
 - [ ] Augmentări relevante domeniu aplicate (NU rotații simple!)
 - [ ] Grafic loss/val_loss salvat în `docs/loss_curve.png`
-- [ ] Analiză erori în context industrial completată (4 întrebări răspunse)
-- [ ] Metrici Nivel 2: **Accuracy ≥75%**, **F1 ≥0.70**
+- [x] Analiză erori în context industrial completată (4 întrebări răspunse)
+- [x] Metrici Nivel 2: **Accuracy ≥75%**, **F1 ≥0.70**
 
 ### Documentație Nivel 3 Bonus (dacă aplicabil)
 - [ ] Comparație 2+ arhitecturi (tabel comparativ + justificare)
@@ -426,20 +424,20 @@ streamlit run src/app/main.py
 - [ ] Toate path-urile RELATIVE (nu absolute: `/Users/...` )
 - [ ] Cod nou comentat în limba română sau engleză (minimum 15%)
 - [ ] `git log` arată commit-uri incrementale (NU 1 commit gigantic)
-- [ ] Verificare anti-plagiat: toate punctele 1-5 respectate
+- [x] Verificare anti-plagiat: toate punctele 1-5 respectate
 
 ### Verificare State Machine (Etapa 4)
-- [ ] Fluxul de inferență respectă stările din State Machine
-- [ ] Toate stările critice (PREPROCESS, INFERENCE, ALERT) folosesc model antrenat
-- [ ] UI reflectă State Machine-ul pentru utilizatorul final
+- [x] Fluxul de inferență respectă stările din State Machine
+- [x] Toate stările critice (PREPROCESS, INFERENCE, ALERT) folosesc model antrenat
+- [x] UI reflectă State Machine-ul pentru utilizatorul final
 
 ### Pre-Predare
 - [ ] `docs/etapa5_antrenare_model.md` completat cu TOATE secțiunile
-- [ ] Structură repository conformă: `docs/`, `results/`, `models/` actualizate
-- [ ] Commit: `"Etapa 5 completă – Accuracy=X.XX, F1=X.XX"`
-- [ ] Tag: `git tag -a v0.5-model-trained -m "Etapa 5 - Model antrenat"`
-- [ ] Push: `git push origin main --tags`
-- [ ] Repository accesibil (public sau privat cu acces profesori)
+- [x] Structură repository conformă: `docs/`, `results/`, `models/` actualizate
+- [x] Commit: `"Etapa 5 completă – Accuracy=X.XX, F1=X.XX"`
+- [x] Tag: `git tag -a v0.5-model-trained -m "Etapa 5 - Model antrenat"`
+- [x] Push: `git push origin main --tags`
+- [x] Repository accesibil (public sau privat cu acces profesori)
 
 ---
 

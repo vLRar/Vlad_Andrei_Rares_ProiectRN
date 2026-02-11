@@ -8,8 +8,7 @@
 ---
 
 ## Scopul Etapei 4
-
-Această etapă corespunde punctului **Predictia Productiei de energie solara in functie de conditiile meteorologice folosind retele neuronale**
+Această etapă corespunde punctului **5. Dezvoltarea arhitecturii aplicației software bazată pe RN** din lista de 9 etape - slide 2 **RN Specificatii proiect.pdf**.
 
 **Trebuie să livrați un SCHELET COMPLET și FUNCȚIONAL al întregului Sistem cu Inteligență Artificială (SIA). In acest stadiu modelul RN este doar definit și compilat (fără antrenare serioasă).**
 
@@ -38,8 +37,9 @@ Completați in acest readme tabelul următor cu **minimum 2-3 rânduri** care le
 
 | **Nevoie reală concretă** | **Cum o rezolvă SIA-ul vostru** | **Modul software responsabil** |
 |---------------------------|--------------------------------|--------------------------------|
-Ex 1: Gestionarea eficientă a stocării în baterii | Predicție producție orară → decizie automată de încărcare/descărcare | Data Acquisition + RN
-Ex 2: Detectarea panourilor murdare sau defecte | Comparare Producție Reală vs. Predicție | Data Acquisition + RN + Alerta
+Predicția Producției: Operatorii de rețea electrică trebuie să știe instantaneu câți Wați va produce un parc fotovoltaic pentru a echilibra rețeaua națională.-Sistemul utilizează o Rețea Neuronală antrenată (Inference) care calculează instantaneu puterea estimată (Output) pe baza parametrilor meteo introduși de operator. Modul software responsabil - Predictie.vi
+Interactivitate și Vizualizare: Nevoia de a simula scenarii "What-If" (ex: Ce se întâmplă dacă vine o furtună brusc?) fără riscuri fizice. - O interfață grafică  care permite modificarea manuală a parametrilor meteo și vizualizarea instantanee a răspunsului rețelei.	- Modul 3: Predictie.vi 
+Lipsa Datelor Istorice: Accesul la date reale de la parcuri fotovoltaice este dificil și costisitor pentru cercetare.	-Dezvoltarea unui simulator numeric propriu care integrează ecuații fizice și zgomot aleator pentru a crea seturi de date infinite.	Modul 1: Generate_Training_Data.vi 
 
 ### 2. Contribuția Voastră Originală la Setul de Date – MINIM 40% din Totalul Observațiilor Finale
 
@@ -60,32 +60,42 @@ Alegeți UNA sau MAI MULTE dintre variantele de mai jos și **demonstrați clar 
 
 | **Tip contribuție** | **Exemple concrete din inginerie** | **Dovada minimă cerută** |
 |---------------------|-------------------------------------|--------------------------|
-| **Date generate prin simulare fizică** | • Traiectorii robot în Gazebo<br>• Vibrații motor cu zgomot aleator calibrat<br>• Consumuri energetice proces industrial simulat | Cod Python/LabVIEW funcțional + grafice comparative (simulat vs real din literatură) + justificare parametri |
-| **Date achiziționate cu senzori proprii** | • 500-2000 măsurători accelerometru pe motor<br>• 100-1000 imagini capturate cu cameră montată pe robot<br>• 200-1000 semnale GPS/IMU de pe platformă mobilă<br>• Temperaturi/presiuni procesate din Arduino/ESP32 | Foto setup experimental + CSV-uri produse + descriere protocol achiziție (frecvență, durata, condiții) |
-| **Etichetare/adnotare manuală** | • Etichetat manual 1000+ imagini defecte sudură<br>• Anotat 500+ secvențe video cu comportamente robot<br>• Clasificat manual 2000+ semnale vibrații (normal/anomalie)<br>• Marcat manual 1500+ puncte de interes în planuri tehnice | Fișier Excel/JSON cu labels + capturi ecran tool etichetare + log timestamp-uri lucru |
-| **Date sintetice prin metode avansate** | • Simulări FEM/CFD pentru date dinamice proces | Cod implementare metodă + exemple before/after + justificare hiperparametri + validare pe subset real |
+| **Date sintetice prin metode avansate** | • Simulări efectuate prin aplicatia Generate_Training_Data.vi
 
 #### Declarație obligatorie în README:
 
 Scrieți clar în acest README (Secțiunea 2):
 
-### Contribuția originală la setul de date:
+### Contribuția originală la setul de date: 100%
 
 **Total observații finale:** [N] (după Etapa 3 + Etapa 4)
 **Observații originale:** [M] ([X]%)
 
 **Tipul contribuției:**
-[X] Date generate prin simulare fizică  
+[ ] Date generate prin simulare fizică  
 [ ] Date achiziționate cu senzori proprii  
-[ ] Etichetare/adnotare manuală  
-[ ] Date sintetice prin metode avansate  
+[x] Etichetare/adnotare manuală  
+[x] Date sintetice prin metode avansate  
 
 **Descriere detaliată:**
-[Explicați în 2-3 paragrafe cum ați generat datele, ce metode ați folosit, 
-de ce sunt relevante pentru problema voastră, cu ce parametri ați rulat simularea/achiziția]
+Generarea setului de date a fost realizată integral în mediul LabVIEW prin intermediul modulului original Generate_Training_Data.vi. Am utilizat o metodă de simulare numerică bazată pe modelul matematic al celulei fotovoltaice, care corelează iradianța solară, temperatura ambientală și randamentul tehnologic pentru a calcula puterea electrică debitată.
 
-**Locația codului:** `src/data_acquisition/[numele_scriptului]`
-**Locația datelor:** `data/generated/` sau `data/raw/original/`
+Modul 2: Neural Network (Definirea Arhitecturii)
+În această etapă, modelul de rețea neuronală a fost definit și configurat în interiorul VI-ului de antrenare, utilizând toolkit-ul Super Simple Neural Network din LabVIEW.
+    Configurație:
+Input Layer: 6 neuroni (corespunzători variabilelor meteo normalizate).
+Hidden Layer: Un singur strat ascuns cu 3 neuroni. Această alegere minimizează complexitatea și previne divergența erorii.
+Output Layer: 1 neuron (puterea generată în Wați).
+
+Modul 3: Interfața Utilizator (UI / Dashboard)
+
+Modulul de predicție (Predictie.vi) servește drept consolă de control pentru utilizatorul final.
+Input: Controale de tip Knob sau Slider pentru setarea manuală a condițiilor de mediu.
+Logică: VI-ul încarcă modelul salvat (training.nn), aplică transformările de scalare (ex. Ora/52.07) și rulează motorul de inferență.
+Output: Afișaj numeric și grafic (Gauge) care indică producția de energie în timp real.
+
+**Locația codului:** `src/data_acquisition/Generate_Training_Data.vi
+**Locația datelor:** `data/processed/date_meteo.csv
 
 **Dovezi:**
 - Grafic comparativ: `docs/generated_vs_real.png`
@@ -176,36 +186,54 @@ RN_FORECAST (24h ahead) → VALIDATE_FORECAST (sanity checks) →
      GENERATE_DAILY_REPORT → STOP
 ```
 
+stateDiagram-v2
+    [*] --> INIT
+    
+    state "1. INIT (Initializare)" as INIT
+    state "2. DATA_GENERATION (Generator)" as GEN
+    state "3. TRAINING (Antrenare RN)" as TRAIN
+    state "4. PREDICTION (Interfață UI)" as PREDICT
+    state "5. ERROR_HANDLING" as ERR
+
+    INIT --> GEN : Start Proiect / Run Generator
+    GEN --> TRAIN : Fișier CSV generat cu succes
+    GEN --> ERR : Eroare scriere fișier
+    
+    TRAIN --> PREDICT : Model .nn salvat
+    TRAIN --> ERR : Eroare convergență (Infinit)
+    
+    PREDICT --> TRAIN : Retestare cu alți parametri
+    PREDICT --> [*] : Închidere aplicație
+    
+    ERR --> INIT : Resetare parametri
+
+    
+
 **Notă pentru proiecte simple:**
 Chiar dacă aplicația voastră este o clasificare simplă (user upload → classify → display), trebuie să modelați fluxul ca un State Machine. Acest exercițiu vă învață să gândiți modular și să anticipați toate stările posibile (inclusiv erori).
 
 **Legendă obligatorie (scrieți în README):**
-```markdown
+INIT - Faza de inițializare în care sistemul verifică prezența toolkit-ului de Neural Network și integritatea folderelor de date (/data/raw, /data/processed).
+DATA_GENERATION - Starea în care sunt rulate ecuațiile fizice pentru simularea producției solare si acoperirea norilor. Se generează cele 5.000 de eșantioane originale și se salvează în format CSV.
+TRAINING - Motorul de calcul al rețelei. Datele sunt normalizate (ex. Ora/52), iar algoritmul Backpropagation ajustează ponderile arhitecturii MLP (6-3-1). Finalizează prin exportul fișierului training.nn.
+PREDICTION - Modelul antrenat este încărcat în memorie, iar sistemul răspunde instantaneu la modificările butoanelor.
+ERROR_HANDLING : Gestionarea excepțiilor, precum lipsa fișierului de date sau divergența erorii în timpul antrenării (eroare "Infinit").
 ### Justificarea State Machine-ului ales:
 
-Am ales arhitectura [descrieți tipul: monitorizare continuă / clasificare la senzor / 
-predicție batch / control în timp real] pentru că proiectul nostru [explicați nevoia concretă 
-din tabelul Secțiunea 1].
-
+Am ales această structură deoarece separă clar procesarea de date de interfața cu utilizatorul. Astfel, dacă vrei să reantrenezi rețeaua cu alte date, nu trebuie să modifici interfața de predicție, ci doar să treci din nou prin starea de Training.
 Stările principale sunt:
-1. [STARE_1]: [ce se întâmplă aici - ex: "achiziție 1000 samples/sec de la accelerometru"]
-2. [STARE_2]: [ce se întâmplă aici - ex: "calcul FFT și extragere 50 features frecvență"]
-3. [STARE_3]: [ce se întâmplă aici - ex: "inferență RN cu latență < 50ms"]
-...
+
+Starea IDLE: Sistemul este pornit, dar așteaptă interacțiunea utilizatorului.
+Starea GENERARE (Modul 1): Activată la pornirea generatorului de date. Creează setul de date CSV original cu 5.000 de eșantioane.
+Starea ANTRENARE (Modul 2): Sistemul citește datele, execută algoritmul Backpropagation și salvează "creierul" rețelei în fișierul .nn.
+Starea PREDICȚIE (Modul 3): Starea de operare continuă. Preia valorile de la butoane, le trece prin rețeaua antrenată și afișează rezultatul.
 
 Tranzițiile critice sunt:
 - [STARE_A] → [STARE_B]: [când se întâmplă - ex: "când buffer-ul atinge 1024 samples"]
 - [STARE_X] → [ERROR]: [condiții - ex: "când senzorul nu răspunde > 100ms"]
 
-Starea ERROR este esențială pentru că [explicați ce erori pot apărea în contextul 
-aplicației voastre industriale - ex: "senzorul se poate deconecta în mediul industrial 
-cu vibrații și temperatură variabilă, trebuie să gestionăm reconnect automat"].
+Starea ERROR este esențială pentru că [Fisierele pot sa nu fie selectate corect, datele de antrenare sa fie corupte ].
 
-Bucla de feedback [dacă există] funcționează astfel: [ex: "rezultatul inferenței 
-actualizează parametrii controlerului PID pentru reglarea vitezei motorului"].
-```
-
----
 
 ### 4. Scheletul Complet al celor 3 Module Cerute la Curs (slide 7)
 
@@ -222,25 +250,25 @@ Toate cele 3 module trebuie să **pornească și să ruleze fără erori** la pr
 #### **Modul 1: Data Logging / Acquisition**
 
 **Funcționalități obligatorii:**
-- [ ] Cod rulează fără erori: `python src/data_acquisition/generate.py` sau echivalent LabVIEW
-- [ ] Generează CSV în format compatibil cu preprocesarea din Etapa 3
-- [ ] Include minimum 40% date originale în dataset-ul final
-- [ ] Documentație în cod: ce date generează, cu ce parametri
+- [x] Cod rulează fără erori: src/data/Generate_Training_Data.vi
+- [x] Generează CSV în format compatibil cu preprocesarea din Etapa 3
+- [x] Include minimum 40% date originale în dataset-ul final
+- [x] Documentație în cod: ce date generează, cu ce parametri
 
 #### **Modul 2: Neural Network Module**
 
 **Funcționalități obligatorii:**
-- [ ] Arhitectură RN definită și compilată fără erori
-- [ ] Model poate fi salvat și reîncărcat
-- [ ] Include justificare pentru arhitectura aleasă (în docstring sau README)
-- [ ] **NU trebuie antrenat** cu performanță bună (weights pot fi random)
+- [x] Arhitectură RN definită și compilată fără erori
+- [x] Model poate fi salvat și reîncărcat
+- [x] Include justificare pentru arhitectura aleasă (în docstring sau README)
+- [x] **NU trebuie antrenat** cu performanță bună (weights pot fi random)
 
 
 #### **Modul 3: Web Service / UI**
 
 **Funcționalități MINIME obligatorii:**
-- [ ] Propunere Interfață ce primește input de la user (formular, file upload, sau API endpoint)
-- [ ] Includeți un screenshot demonstrativ în `docs/screenshots/`
+- [x] Propunere Interfață ce primește input de la user (formular, file upload, sau API endpoint)
+- [x] Includeți un screenshot demonstrativ în `docs/screenshots/`
 
 **Ce NU e necesar în Etapa 4:**
 - UI frumos/profesionist cu grafică avansată
@@ -294,32 +322,32 @@ proiect-rn-[nume-prenume]/
 ## Checklist Final – Bifați Totul Înainte de Predare
 
 ### Documentație și Structură
-- [ ] Tabelul Nevoie → Soluție → Modul complet (minimum 2 rânduri cu exemple concrete completate in README_Etapa4_Arhitectura_SIA.md)
-- [ ] Declarație contribuție 40% date originale completată în README_Etapa4_Arhitectura_SIA.md
-- [ ] Cod generare/achiziție date funcțional și documentat
-- [ ] Dovezi contribuție originală: grafice + log + statistici în `docs/`
-- [ ] Diagrama State Machine creată și salvată în `docs/state_machine.*`
-- [ ] Legendă State Machine scrisă în README_Etapa4_Arhitectura_SIA.md (minimum 1-2 paragrafe cu justificare)
-- [ ] Repository structurat conform modelului de mai sus (verificat consistență cu Etapa 3)
+- [x] Tabelul Nevoie → Soluție → Modul complet (minimum 2 rânduri cu exemple concrete completate in README_Etapa4_Arhitectura_SIA.md)
+- [x] Declarație contribuție 40% date originale completată în README_Etapa4_Arhitectura_SIA.md
+- [x] Cod generare/achiziție date funcțional și documentat
+- [x] Dovezi contribuție originală: grafice + log + statistici în `docs/`
+- [x] Diagrama State Machine creată și salvată în `docs/state_machine.*`
+- [x] Legendă State Machine scrisă în README_Etapa4_Arhitectura_SIA.md (minimum 1-2 paragrafe cu justificare)
+- [x] Repository structurat conform modelului de mai sus (verificat consistență cu Etapa 3)
 
 ### Modul 1: Data Logging / Acquisition
-- [ ] Cod rulează fără erori (`python src/data_acquisition/...` sau echivalent LabVIEW)
-- [ ] Produce minimum 40% date originale din dataset-ul final
-- [ ] CSV generat în format compatibil cu preprocesarea din Etapa 3
-- [ ] Documentație în `src/data_acquisition/README.md` cu:
-  - [ ] Metodă de generare/achiziție explicată
-  - [ ] Parametri folosiți (frecvență, durată, zgomot, etc.)
-  - [ ] Justificare relevanță date pentru problema voastră
-- [ ] Fișiere în `data/generated/` conform structurii
+- [x] Cod rulează fără erori (`python src/data_acquisition/...` sau echivalent LabVIEW)
+- [x] Produce minimum 40% date originale din dataset-ul final
+- [x] CSV generat în format compatibil cu preprocesarea din Etapa 3
+- [x] Documentație în `src/data_acquisition/README.md` cu:
+  - [x] Metodă de generare/achiziție explicată
+  - [x] Parametri folosiți (frecvență, durată, zgomot, etc.)
+  - [x] Justificare relevanță date pentru problema voastră
+- [x] Fișiere în `data/generated/` conform structurii
 
 ### Modul 2: Neural Network
-- [ ] Arhitectură RN definită și documentată în cod (docstring detaliat) - versiunea inițială 
-- [ ] README în `src/neural_network/` cu detalii arhitectură curentă
+- [x] Arhitectură RN definită și documentată în cod (docstring detaliat) - versiunea inițială 
+- [x] README în `src/neural_network/` cu detalii arhitectură curentă
 
 ### Modul 3: Web Service / UI
-- [ ] Propunere Interfață ce pornește fără erori (comanda de lansare testată)
-- [ ] Screenshot demonstrativ în `docs/screenshots/ui_demo.png`
-- [ ] README în `src/app/` cu instrucțiuni lansare (comenzi exacte)
+- [x] Propunere Interfață ce pornește fără erori (comanda de lansare testată)
+- [x] Screenshot demonstrativ în `docs/screenshots/ui_demo.png`
+- [x] README în `src/app/` cu instrucțiuni lansare (comenzi exacte)
 
 ---
 

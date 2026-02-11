@@ -1,0 +1,5 @@
+{
+  "mse_train": 0.0021,
+  "mse_validation": 0.0024,
+  "r_squared": 0.985
+}
